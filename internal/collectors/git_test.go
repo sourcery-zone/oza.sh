@@ -7,18 +7,24 @@ import (
 	"testing"
 )
 
+// runCmd run a command line in a directory and fail if error happened.
+func runCmd(t *testing.T, dir ,name string, args ...string) {
+		cmd := exec.Command(name, args...)
+		cmd.Dir = dir
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+				t.Fatalf("Failed to run %s %v: %v\nOutput:\n%s", name, args, err, string(output))
+		}
+}
+
 // createTestGitRepo helper to create a temporary git repo
 func createTestGitRepo(t *testing.T) string {
 		baseDir := t.TempDir()
 
 		run := func(name string, args ...string) {
-				cmd := exec.Command(name, args...)
-				cmd.Dir = baseDir
-				output, err := cmd.CombinedOutput()
-				if err != nil {
-						t.Fatalf("Failed to run %s %v: %v\nOutput:\n%s", name, args, err, string(output))
-				}
+				runCmd(t, baseDir, name, args...)
 		}
+
 		// Initialize an empty repo
 		run("git", "init")
 		// Create an empty commit
@@ -34,18 +40,29 @@ func createTestGitRepo(t *testing.T) string {
 
 // TestIsGitDirectory test if the input directory is a git repository.
 func TestIsGitDirectory(t *testing.T) {
-		dir := createTestGitRepo(t)
-
-		if !isGitDirectory(dir) {
+		if !isGitDirectory(createTestGitRepo(t)) {
 				t.Errorf("Expected directory to be a git repo")
+		}
+
+		// Test a normal directory
+		if isGitDirectory(t.TempDir()) {
+				t.Errorf("Expected to not be a git repository")
 		}
 }
 
-// TestIsNotGitDirectory ensure it's also able to check non-git directories.
-func TestIsNotGitDirectory(t *testing.T) {
-		dir := t.TempDir()
+// TestIsGitDirty test if the git repository is dirty
+func TestIsGitDirty(t *testing.T) {
+		repo := createTestGitRepo(t)
 
-		if isGitDirectory(dir) {
-				t.Errorf("Expected to not be a git repository")
+		if isGitDirty(repo) {
+				t.Errorf("Expected the git repository to be clean!")
 		}
+
+		// Create an empty commit
+		os.WriteFile(filepath.Join(repo, "LICENSE.md"), []byte("# test"), 0644)
+
+		if !isGitDirty(repo) {
+				t.Errorf("Expected the repo to be empty!")
+		}
+
 }
