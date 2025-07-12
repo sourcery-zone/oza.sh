@@ -1,6 +1,9 @@
 package collectors
 
-import "os/exec"
+import (
+	"os/exec"
+	"strings"
+)
 
 // isGitDirectory check if `path` is a git repository.
 func isGitDirectory(path string) bool {
@@ -19,4 +22,16 @@ func isGitDirty(path string) bool {
 		}
 
 		return len(output) > 0
+}
+
+// getGitBranch get the current branch name of the git repostiroy.
+func getGitBranch(path string) string {
+		cmd := exec.Command("git", "-C", path, "rev-parse", "--abbrev-ref", "HEAD")
+		output, err := cmd.Output()
+		if err != nil {
+				return ""
+		}
+
+		branch := strings.TrimSpace(string(output))
+		return branch
 }

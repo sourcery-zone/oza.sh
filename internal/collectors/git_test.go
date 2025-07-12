@@ -1,6 +1,7 @@
 package collectors
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -65,4 +66,20 @@ func TestIsGitDirty(t *testing.T) {
 				t.Errorf("Expected the repo to be empty!")
 		}
 
+}
+
+// TestGetGitBranch get the current branch name of the git repository.
+func TestGetGitBranch(t *testing.T) {
+		repo := createTestGitRepo(t)
+
+		if getGitBranch(repo) != "main" {
+				t.Errorf("Expected to receive the main branch.")
+		}
+
+		expect := "newBranch"
+		runCmd(t, repo, "git", "checkout", "-B", expect)
+
+		if got := getGitBranch(repo); got != expect {
+				t.Errorf("Expected: %s, got: %s", expect, got)
+		}
 }
