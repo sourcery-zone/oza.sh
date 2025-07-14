@@ -41,8 +41,8 @@ func TestIsGitDirty(t *testing.T) {
 func TestGetGitBranch(t *testing.T) {
 	repo := helpers.CreateTestGitRepo(t)
 
-	if getGitBranch(repo) != "main" {
-		t.Errorf("Expected to receive the main branch.")
+	if branch := getGitBranch(repo); branch != "main" && branch != "master" {
+		t.Errorf("Expected to receive the main branch, received: %s", branch)
 	}
 
 	expect := "newBranch"

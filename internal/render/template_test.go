@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -21,13 +22,14 @@ func TestRenderGitTemplate(t *testing.T) {
 	}
 
 	format := "{{ Git.Branch }}{{ if Git.Dirty }}*{{ end }}"
-	if out := render(format); out != "main" {
-		t.Errorf("unexpected output: %s", out)
+	branch := render(format)
+	if branch != "main" && branch != "master" {
+		t.Errorf("unexpected output: %s", branch)
 	}
 
 	// make it dirty
 	os.WriteFile(filepath.Join(path, "TESTFILE"), []byte("# TEST"), 0644)
-	if out := render(format); out != "main*" {
+	if out := render(format); out != fmt.Sprintf("%s*", branch) {
 		t.Errorf("unexpected output: %s", out)
 	}
 }
