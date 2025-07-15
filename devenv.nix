@@ -1,12 +1,15 @@
 { pkgs, lib, config, inputs, ... }:
 
-{
+let
+  python-packages = p: with p; [ commitizen ];
+in {
   # https://devenv.sh/basics/
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
   packages = with pkgs; [
     gopls
+    (python3.withPackages python-packages)
   ];
 
   # https://devenv.sh/languages/
